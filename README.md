@@ -1,1 +1,1 @@
-# cf_ai_PROJECT
+# cf_ai_echo_journal
