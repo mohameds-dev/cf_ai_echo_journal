@@ -1,5 +1,5 @@
 from workers import DurableObject, Response, WorkerEntrypoint
-
+import json
 """
  * Welcome to Cloudflare Workers! This is your first Durable Objects application.
  *
@@ -28,6 +28,7 @@ class MyDurableObject(DurableObject):
     """
     def __init__(self, ctx, env):
         super().__init__(ctx, env)
+        self.chat_history = []
 
     """
      * The Durable Object exposes an RPC method `say_hello` which will be invoked when a Durable
@@ -38,6 +39,17 @@ class MyDurableObject(DurableObject):
     """
     async def say_hello(self, name):
         return f"Hello, {name}!"
+    
+    async def prompt_llama(self, text):
+        self.chat_history.append(text)
+        response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct' , {"prompt":text})
+        response_dict = response.to_py()
+        self.chat_history.append(response_dict["response"])
+
+        return response_dict
+    
+    async def retrieve_chat_history(self):
+        return self.chat_history
 
 
 """
@@ -50,6 +62,8 @@ class MyDurableObject(DurableObject):
 """
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
+        if "/favicon.ico" in request.url:
+            return Response("Not Found", status=404)
         # Create a stub to open a communication channel with the Durable Object
         # instance named "foo".
         #
@@ -59,7 +73,15 @@ class Default(WorkerEntrypoint):
 
         # Call the `say_hello()` RPC method on the stub to invoke the method on
         # the remote Durable Object instance.
-        greeting = await stub.say_hello("world")
+        # greeting = await stub.say_hello("world")
+        await stub.prompt_llama("Explain why journaling is good for the brain in one sentence.")
+        chat_history_list = await stub.retrieve_chat_history()
 
-        return Response(greeting)
 
+        data = {
+            "history":chat_history_list
+        }
+        return Response(
+                json.dumps(data),
+                headers={"content-type": "application/json"}
+            )
