@@ -6,3 +6,22 @@ requires-python = ">=3.12"
 name = "cf-ai-echo-journal"
 version = "0.1.0"
 source = { virtual = "." }
+
+[package.dev-dependencies]
+dev = [
+    { name = "workers-runtime-sdk" },
+]
+
+[package.metadata]
+
+[package.metadata.requires-dev]
+dev = [{ name = "workers-runtime-sdk", specifier = ">=0.3.1" }]
+
+[[package]]
+name = "workers-runtime-sdk"
+version = "0.3.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/3a/56/d26fda0c781c538c709951df6ae85b34530acf68f36fabb75e8a4afe155e/workers_runtime_sdk-0.3.1.tar.gz", hash = "sha256:6ed148ed3b8d218bedf173f9c5fc214f2b70b212504303ebeca2669e0f24546a", size = 25169, upload-time = "2025-11-11T18:41:43.084Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b1/5e/3366889aa83ad20ea90509cfacb2dd78d1906a485bf3509ab16694923cbd/workers_runtime_sdk-0.3.1-py3-none-any.whl", hash = "sha256:0f2feac02c047da43a81cf0c7710fec703f588dee4a602e4230c1e343fab5c94", size = 14456, upload-time = "2025-11-11T18:41:41.971Z" },
+]
