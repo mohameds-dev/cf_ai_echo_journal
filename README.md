@@ -224,3 +224,28 @@ class Default(WorkerEntrypoint):
             )
 
 ```
+
+
+#### Prompt
+
+```
+How can I track my llama usage? and where can I save the chat history? Point me to where I can find the answer to these questions in the cloudflare docs.
+
+```
+
+#### Prompt
+
+
+```
+Let's use DO storage. I'm trying to create a SQL table for the chat. Add proper fields for user entry, ai response, and creation time:
+
+
+ def __init__(self, ctx, env):
+        super().__init__(ctx, env)
+        self.sql = ctx.storage.sql
+        self.sql.exec("""
+        CREATE TABLE IF NOT EXISTS journal(
+            user_entry   TEXT
+        );
+        """)
+```

@@ -17,7 +17,6 @@ import json
  * @property {DurableObjectNamespace} MY_DURABLE_OBJECT - The Durable Object namespace binding
 """
 
-# A Durable Object's behavior is defined in an exported Python class
 class MyDurableObject(DurableObject):
     """
      * The constructor is invoked once upon creation of the Durable Object, i.e. the first call to
@@ -30,26 +29,33 @@ class MyDurableObject(DurableObject):
         super().__init__(ctx, env)
         self.chat_history = []
 
-    """
-     * The Durable Object exposes an RPC method `say_hello` which will be invoked when a Durable
-     *  Object instance receives a request from a Worker via the same method invocation on the stub
-     *
-     * @param {string} name - The name provided to a Durable Object instance from a Worker
-     * @returns {Promise<string>} The greeting to be sent back to the Worker
-    """
-    async def say_hello(self, name):
-        return f"Hello, {name}!"
-    
-    async def prompt_llama(self, text):
-        self.chat_history.append(text)
-        response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct' , {"prompt":text})
-        response_dict = response.to_py()
-        self.chat_history.append(response_dict["response"])
+        self.sql = ctx.storage.sql
 
+        self.sql.exec("""
+        CREATE TABLE IF NOT EXISTS journal_entries(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_prompt TEXT,
+            ai_response TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+        """)
+
+    
+    async def prompt_llama(self, user_prompt):
+        response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {"prompt": user_prompt})
+        response_dict = response.to_py()
+        ai_response = response_dict["response"]
+
+        self.sql.exec(
+            "INSERT INTO journal_entries (user_prompt, ai_response) VALUES (?, ?)", 
+            user_prompt, 
+            ai_response
+        )
         return response_dict
     
-    async def retrieve_chat_history(self):
-        return self.chat_history
+    async def get_saved_entries(self):
+        cursor = self.sql.exec("SELECT * FROM journal_entries")
+        return list(cursor)
 
 
 """
@@ -64,24 +70,14 @@ class Default(WorkerEntrypoint):
     async def fetch(self, request):
         if "/favicon.ico" in request.url:
             return Response("Not Found", status=404)
-        # Create a stub to open a communication channel with the Durable Object
-        # instance named "foo".
-        #
-        # Requests from all Workers to the Durable Object instance named "foo"
-        # will go to a single remote Durable Object instance.
+        
         stub = self.env.MY_DURABLE_OBJECT.getByName("foo")
 
-        # Call the `say_hello()` RPC method on the stub to invoke the method on
-        # the remote Durable Object instance.
-        # greeting = await stub.say_hello("world")
         await stub.prompt_llama("Explain why journaling is good for the brain in one sentence.")
-        chat_history_list = await stub.retrieve_chat_history()
+        
+        history = await stub.get_saved_entries()
 
-
-        data = {
-            "history":chat_history_list
-        }
         return Response(
-                json.dumps(data),
+                json.dumps({"history":history}),
                 headers={"content-type": "application/json"}
             )
