@@ -163,3 +163,64 @@ How to use the --active flag to use the active environment instead of using a ne
 ```bash
 uv run --active pywrangler dev
 ```
+
+
+#### Prompt 5
+
+```
+This is a function I defined inside the durable object:
+
+async def prompt_llama(self, text):
+        response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct' , {"prompt":text})
+
+The documentation shows snippets in javascript for calling this API. what about what to expect from the API in python? Also include the link to the documentation page where I can learn more about this.
+```
+
+
+#### Prompt 6
+```
+Why does this code cause the prompt text to be added to the history twice?
+
+from workers import DurableObject, Response, WorkerEntrypoint
+import json
+
+class MyDurableObject(DurableObject):
+
+    def __init__(self, ctx, env):
+        super().__init__(ctx, env)
+        self.chat_history = []
+
+    async def say_hello(self, name):
+        return f"Hello, {name}!"
+    
+    async def prompt_llama(self, text):
+        self.chat_history.append(text)
+        response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct' , {"prompt":text})
+        response_dict = response.to_py()
+        self.chat_history.append(response_dict["response"])
+
+        return response_dict
+    
+    async def retrieve_chat_history(self):
+        return self.chat_history
+
+
+
+class Default(WorkerEntrypoint):
+    async def fetch(self, request):
+
+        stub = self.env.MY_DURABLE_OBJECT.getByName("foo")
+
+        await stub.prompt_llama("Explain why journaling is good for the brain in one sentence.")
+        chat_history_list = await stub.retrieve_chat_history()
+
+
+        data = {
+            "history":chat_history_list
+        }
+        return Response(
+                json.dumps(data),
+                headers={"content-type": "application/json"}
+            )
+
+```
