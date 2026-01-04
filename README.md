@@ -1,5 +1,12 @@
 # cf_ai_echo_journal
 
+### Project structure
+
+- `src/entry.py`: the main python logic for the API
+- `src/queries.py`: sql queries used in `entry.py`, placed in a separate file for better readability and SOC
+-  `public`: Where the frontend assets live
+
+
 ### To run the project locally
 
 0. Ensure to have a recent version of node and npm (relative to the time of this project's creation)
@@ -7,6 +14,12 @@
 2. Create the `.venv`. DO NOT use `pip install .`, instead, use `uv sync`
 3. Activate the `.venv`, either in the terminal using `. ./.venv/bin/python` or by following the steps in the IDE of your choice
 4. Run the project using this command: `npm run dev`
+
+
+### Troubleshooting
+
+- To reset the local storage, remove the hidden `.wrangler` folder. You can use this command: `rm -rf .wrangler`
+
 
 ### 📖 Documentation
 https://developers.cloudflare.com/workers
