@@ -1,5 +1,6 @@
 from workers import DurableObject, Response, WorkerEntrypoint
 import json
+import queries
 """
  * Welcome to Cloudflare Workers! This is your first Durable Objects application.
  *
@@ -28,33 +29,25 @@ class MyDurableObject(DurableObject):
     def __init__(self, ctx, env):
         super().__init__(ctx, env)
         self.chat_history = []
-
         self.sql = ctx.storage.sql
-
-        self.sql.exec("""
-        CREATE TABLE IF NOT EXISTS journal_entries(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_prompt TEXT,
-            ai_response TEXT,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-        """)
+        self.sql.exec(queries.SCHEMA_SQL)
 
     
     async def prompt_llama(self, user_prompt):
         response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {"prompt": user_prompt})
         response_dict = response.to_py()
         ai_response = response_dict["response"]
-
         self.sql.exec(
-            "INSERT INTO journal_entries (user_prompt, ai_response) VALUES (?, ?)", 
+            queries.INSERT_ENTRY, 
             user_prompt, 
             ai_response
         )
+
         return response_dict
     
     async def get_saved_entries(self):
-        cursor = self.sql.exec("SELECT * FROM journal_entries")
+        cursor = self.sql.exec(queries.SELECT_ALL_ENTRIES)
+
         return list(cursor)
 
 
