@@ -232,3 +232,16 @@ Let's use DO storage. I'm trying to create a SQL table for the chat. Add proper 
         );
         """)
 ```
+
+
+#### Prompt
+
+```
+How is the request structured when I receive it in the fetch method in python worker? What fields can I access in the request object? Provide the relevant documentation links.
+```
+
+#### Prompt
+
+```
+How is audio data processed from bytes to text? Is this where whisper comes in handy? Provide the the relevant documentation links for whisper API and for different ways we can handle audio/voice data.
+```

@@ -32,7 +32,8 @@ class MyDurableObject(DurableObject):
         self.sql = ctx.storage.sql
         self.sql.exec(queries.SCHEMA_SQL)
 
-    
+    # TODO: db saving is an unexpected side effect here. move it to a 
+    # different method. worker should have control over history actions
     async def prompt_llama(self, user_prompt):
         response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {"prompt": user_prompt})
         response_dict = response.to_py()
@@ -45,10 +46,16 @@ class MyDurableObject(DurableObject):
 
         return response_dict
     
+    async def save_entry_to_history(self, user_prompt, ai_response):
+        # TODO: save the turn here
+        pass
+    
     async def get_saved_entries(self):
-        cursor = self.sql.exec(queries.SELECT_ALL_ENTRIES)
-
-        return list(cursor)
+        return list(self.sql.exec(queries.SELECT_ALL_ENTRIES))
+    
+    async def get_text_from_whisper(self, audio_bytes):
+        # TODO: hit whisper here and return the text as is
+        pass
 
 
 """
@@ -64,10 +71,15 @@ class Default(WorkerEntrypoint):
         if "/favicon.ico" in request.url:
             return Response("Not Found", status=404)
         
-        stub = self.env.MY_DURABLE_OBJECT.getByName("foo")
-
-        await stub.prompt_llama("Explain why journaling is good for the brain in one sentence.")
+        if "recording" not in request.url:
+            return Response("Not Found", status=404)
         
+        stub = self.env.MY_DURABLE_OBJECT.getByName("foo")
+        audio_bytes = None # TODO: get the audio bytes from the request
+        transcribed_text = await stub.get_text_from_whisper(audio_bytes)
+
+        await stub.prompt_llama(f"Summarize these thoughts in a journal style: {transcribed_text}")
+
         history = await stub.get_saved_entries()
 
         return Response(
