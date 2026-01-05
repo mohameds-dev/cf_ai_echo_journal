@@ -245,3 +245,15 @@ How is the request structured when I receive it in the fetch method in python wo
 ```
 How is audio data processed from bytes to text? Is this where whisper comes in handy? Provide the the relevant documentation links for whisper API and for different ways we can handle audio/voice data.
 ```
+
+
+#### Prompt
+```
+How to handle authorization when the project is run on a different device and potentially by a different person (e.g. a person from Cloudflare)?
+Tell me all about the deployment (with relevant docs links):
+- How to deploy
+- How to see logs
+- How to access the URL and make requests to it
+- How to take it down (delete completely OR just take down the URL)
+
+```

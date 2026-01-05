@@ -8,6 +8,7 @@
 	"ai": {
 		"binding": "AI"
 	},
+	"workers_dev": false,
 	"d1_databases": [
 		{
 		"binding": "journal_db",
