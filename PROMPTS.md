@@ -332,3 +332,9 @@ I want to do stub.update_context(transcribed_text) but I don't want to await it 
 ```
 LLM seems to be overthinking. I need to make it blunt and simple. Should I continue with more complex prompt engineering or should I look for a simpler model? Which simpler model could I use?
 ```
+
+#### Prompt
+
+```
+Let's retrieve history on page load but also an option to delete it entirely. Any issues I need to look out for before proceeding with this change?
+```

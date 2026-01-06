@@ -1,10 +1,31 @@
-# cf_ai_echo_journal
+## 🎙️ Echo Journal
 
-### Project structure
+Echo Journal is a stateful, voice-first AI journaling application built on the Cloudflare edge. It transforms spoken thoughts into structured reflections while maintaining a persistent "brain" that remembers the conversation history.
 
-- `src/entry.py`: the main python logic for the API
-- `src/queries.py`: sql queries used in `entry.py`, placed in a separate file for better readability and SOC
--  `public`: Where the frontend assets live
+This was built as part of an optional Cloudflare internship application assignment.
+
+🧠 The Core Concept
+- Voice-to-Insight Pipeline: User records audio → Transcribed via Whisper → Passed to Llama 3.2 (3B) using the running context → Concise, factual reflection returned to user.
+- Stateful Intelligence: A Durable Object acts as a long-lived state container with its own database and maintained context, ensuring your journal isn't just a series of isolated entries.
+
+---
+
+### Architecture overview
+
+- **Frontend**
+  - Minimal HTML/CSS/JS served by the Worker
+  - Handles basic interaction and audio input
+  - Sends requests to the API endpoint
+
+- **Cloudflare Worker (Python)**
+  - Entry point for requests
+  - Orchestrates prompt construction
+  - Interfaces with the Durable Object
+
+- **Durable Object**
+  - Stores evolving AI state
+  - Uses SQLite for persistence
+  - Represents a single logical “memory instance”
 
 
 ### Running the project (tested using Ubuntu Linux)
@@ -34,19 +55,11 @@
 
 ### Architectural notes & technical descisions
 
-- The Durable Object, which is used for data persistence, is named "main_history" is hard-coded just for this proof of concept. In real-world applications, it would be generated using the user ID, which is only possible in an application with Auth set up.
 - **Prototyping Note on Data Isolation**: For this proof-of-concept, the application uses a single Durable Object instance to manage state.
    - Current State: Data is persisted across all sessions. This means multiple users currently share the same "hidden context" and history.
    - Production Path: In a real-world deployment, I would implement Multi-tenancy by dynamically creating a unique Durable Object ID for each authenticated User ID. This would ensure strict data isolation where every user has their own private "brain" and history.
+- **Using the smaller Llama 3.2 (20B) instead of bigger models**: I opted for a smaller, more "blunt" model specifically to reduce hallucination drift. While larger models (like 70B) often try to invent complex narratives or characters to be "helpful," the 3B model is more literal and factual. It fits the use case perfectly by strictly summarizing the user's state without adding creative or imagined layers.
 
 
-### 📖 Documentation
-https://developers.cloudflare.com/workers
-
-### 🐛 Report an Issue
-https://github.com/cloudflare/workers-sdk/issues/new/choose
-
-### 💬 Community
-https://discord.cloudflare.com
 
 
