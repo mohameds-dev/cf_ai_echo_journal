@@ -87,3 +87,16 @@ function addEntryToUI(prompt, response) {
     journalWindow.appendChild(div);
     journalWindow.scrollTo(0, journalWindow.scrollHeight);
 }
+
+
+document.getElementById('clearBtn').addEventListener('click', async () => {
+    if (!confirm("Wipe all context and history?")) return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const key = urlParams.get('key') || '';
+    
+    const res = await fetch(`/clear?key=${key}`, { method: 'POST' });
+    if (res.ok) {
+        document.getElementById('journal-window').innerHTML = '';
+        alert("Memory wiped.");
+    }
+});

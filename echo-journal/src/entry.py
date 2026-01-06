@@ -2,7 +2,7 @@ from workers import DurableObject, Response, WorkerEntrypoint
 import json
 import queries
 from prompts import MAIN_PROMPT, UPDATE_PROMPT
-
+from urllib.parse import urlparse
 
 class JournalManager(DurableObject):
     """
@@ -32,6 +32,8 @@ class JournalManager(DurableObject):
         return [dict(row) for row in cursor]
     
     async def get_text_from_audio(self, audio_bytes):
+        if not audio_bytes:
+            return ""
         response = await self.env.AI.run('@cf/openai/whisper', {"audio":list(audio_bytes)})
         return response.to_py().get("text")
     
@@ -41,6 +43,11 @@ class JournalManager(DurableObject):
     
     async def get_running_context(self):
         return self.running_context
+    
+    async def clear_history(self):
+        self.sql.exec(queries.CLEAR_HISTORY)
+        self.sql.exec(queries.CLEAR_CONTEXT)
+        self.running_context = ""
 
 
 """
@@ -51,14 +58,23 @@ class JournalManager(DurableObject):
 """
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        if "/favicon.ico" in request.url:
-            return Response("Not Found", status=404)
-        
-        if "recording" not in request.url:
+        path = urlparse(request.url).path
+        if path == "/favicon.ico":
             return Response("Not Found", status=404)
         
         stub = self.env.JOURNAL_MANAGER.getByName("main_history")
 
+        if path == "/clear":
+            await stub.clear_history()
+            return Response("History cleared", status=200)
+        
+        if path == "/recording":
+            return await self.handle_journal_entry(request, stub)
+        
+        return Response("Not Found", status=404)
+        
+    
+    async def handle_journal_entry(self, request, stub):
         audio_bytes = await self.extract_audio_bytes(request)
         transcribed_text = await stub.get_text_from_audio(audio_bytes)
         current_context = await stub.get_running_context()
@@ -81,7 +97,6 @@ class Default(WorkerEntrypoint):
         audio_file = request_data.get("file")
         if not audio_file:
             return None
-        
         audio_bytes = await audio_file.bytes()
 
         return audio_bytes

@@ -34,3 +34,6 @@ SELECT value FROM state WHERE key = 'context' LIMIT 1
 UDPATE_CONTEXT = """
 INSERT OR REPLACE INTO state (key, value) VALUES ('context', ?)
 """
+
+CLEAR_HISTORY = "DELETE FROM journal_entries;"
+CLEAR_CONTEXT = "DELETE FROM state WHERE key = 'context';"

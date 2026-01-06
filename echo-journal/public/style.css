@@ -53,3 +53,11 @@ hr {
     background: #fafafa;
     border-radius: 0 8px 8px 0;
 }
+
+
+.danger-zone { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
+.btn-clear { 
+    background: none; border: 1px solid #ff4444; color: #ff4444; 
+    padding: 8px 16px; border-radius: 20px; cursor: pointer; font-size: 0.8rem;
+}
+.btn-clear:hover { background: #ff4444; color: white; }
