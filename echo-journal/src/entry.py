@@ -3,28 +3,9 @@ import json
 import queries
 from prompts import MAIN_PROMPT, UPDATE_PROMPT
 
-"""
- * Welcome to Cloudflare Workers! This is your first Durable Objects application.
- *
- * - Run `npm run dev` in your terminal to start a development server
- * - Open a browser tab at http://localhost:8787/ to see your Durable Object in action
- * - Run `npm run deploy` to publish your application
- *
- * Learn more at https://developers.cloudflare.com/durable-objects
-"""
-
-"""
- * Env provides a mechanism to reference bindings declared in wrangler.jsonc within Python
- *
- * @typedef {Object} Env
- * @property {DurableObjectNamespace} MY_DURABLE_OBJECT - The Durable Object namespace binding
-"""
 
 class JournalManager(DurableObject):
     """
-     * The constructor is invoked once upon creation of the Durable Object, i.e. the first call to
-     * `DurableObjectStub::get` for a given identifier (no-op constructors can be omitted)
-     *
      * @param {DurableObjectState} ctx - The interface for interacting with Durable Object state
      * @param {Env} env - The interface to reference bindings declared in wrangler.jsonc
     """
@@ -63,8 +44,6 @@ class JournalManager(DurableObject):
 
 
 """
-* This is the standard fetch handler for a Cloudflare Worker
-*
 * @param {Request} request - The request submitted to the Worker from the client
 * @param {Env} env - The interface to reference bindings declared in wrangler.jsonc
 * @param {ExecutionContext} ctx - The execution context of the Worker
