@@ -13,6 +13,11 @@ VALUES (?, ?);
 """
 
 SELECT_ALL_ENTRIES = """
-SELECT * FROM journal_entries 
+SELECT 
+    id, 
+    user_prompt, 
+    ai_response, 
+    created_at 
+FROM history 
 ORDER BY created_at DESC;
 """
