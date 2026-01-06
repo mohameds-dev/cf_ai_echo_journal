@@ -35,6 +35,9 @@
 ### Architectural notes & technical descisions
 
 - The Durable Object, which is used for data persistence, is named "main_history" is hard-coded just for this proof of concept. In real-world applications, it would be generated using the user ID, which is only possible in an application with Auth set up.
+- **Prototyping Note on Data Isolation**: For this proof-of-concept, the application uses a single Durable Object instance to manage state.
+   - Current State: Data is persisted across all sessions. This means multiple users currently share the same "hidden context" and history.
+   - Production Path: In a real-world deployment, I would implement Multi-tenancy by dynamically creating a unique Durable Object ID for each authenticated User ID. This would ensure strict data isolation where every user has their own private "brain" and history.
 
 
 ### 📖 Documentation
