@@ -28,8 +28,8 @@ class JournalManager(DurableObject):
         self.sql.exec(queries.INSERT_ENTRY, user_prompt, ai_response)
     
     async def get_history(self):
-        cursor = await self.sql.exec(queries.SELECT_ALL_ENTRIES)
-        return [dict(row) for row in cursor]
+        cursor = self.sql.exec(queries.SELECT_ALL_ENTRIES)
+        return [row.to_py() for row in cursor]
     
     async def get_text_from_audio(self, audio_bytes):
         if not audio_bytes:
@@ -68,8 +68,15 @@ class Default(WorkerEntrypoint):
             await stub.clear_history()
             return Response("History cleared", status=200)
         
-        if path == "/recording":
+        elif path == "/recording":
             return await self.handle_journal_entry(request, stub)
+        
+        elif path == "/history":
+            history = await stub.get_history()
+            return Response(
+                json.dumps(history),
+                headers={"content-type": "application/json"}
+            )
         
         return Response("Not Found", status=404)
         

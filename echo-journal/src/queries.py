@@ -23,7 +23,7 @@ SELECT
     user_prompt, 
     ai_response, 
     created_at 
-FROM history 
+FROM journal_entries 
 ORDER BY created_at DESC;
 """
 

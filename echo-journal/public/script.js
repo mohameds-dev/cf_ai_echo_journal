@@ -100,3 +100,25 @@ document.getElementById('clearBtn').addEventListener('click', async () => {
         alert("Memory wiped.");
     }
 });
+
+
+async function loadHistory() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const key = urlParams.get('key') || '';
+    
+    try {
+        const res = await fetch(`/history?key=${key}`);
+        if (res.ok) {
+            const history = await res.json();
+            history.forEach(entry => {
+                addEntryToUI(entry.user_prompt, entry.ai_response);
+            });
+            const journalWindow = document.getElementById('journal-window');
+            journalWindow.scrollTop = journalWindow.scrollHeight;
+        }
+    } catch (err) {
+        console.error("Failed to load history:", err);
+    }
+}
+
+window.addEventListener('DOMContentLoaded', loadHistory);
