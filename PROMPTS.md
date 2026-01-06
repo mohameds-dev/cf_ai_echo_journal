@@ -257,3 +257,52 @@ Tell me all about the deployment (with relevant docs links):
 - How to take it down (delete completely OR just take down the URL)
 
 ```
+
+
+
+#### Prompt
+```
+Now, let's plan the front-end strategically so we don't drown in a pile of unstructured html, css, and js. Let's make it minimal, then make it better. Initial plan:
+
+A scrollable window that displays the summarized journal and gets more added to it as the user sends more recordings, and a button below it.
+
+I want the button to show:
+- "Record" when ready
+- "Recording... Click to send" when recording along with a "cancel" below it to cancel recording
+- "Processing..." when the voice is sent. 
+- once it's back, the text should appear on screen, and the button should go back to "Record" and the cancel button gone.
+
+Let's manage this with a simple state machine for cleaner code and easier modification later. States should be "Ready", "Recording", "Processing" and the UI will cycle through these and js should have a function "apply state" which knows the logic for each state and applies it accordingly.
+
+State machine should look like this:
+
+- Ready --> Recording: when record is clicked
+- Recording --> Ready: when cancel is clicked
+- Recording --> Processing: when "Recording... Click to send" button is clicked 
+- Processing --> Ready: when the response is back.
+```
+
+
+#### Prompt
+
+```
+I cannot find the exact structure of the request object and how I can extract the audio data from it. Find me the documentation page that discusses that part.
+```
+
+
+#### Prompt
+
+```
+request.formData did not work. It asked if I meant "form_data" which returned an object. Converting that object to a dict returned this:
+
+
+req = await request.form_data()
+print(f"request is:\n{dict(req).get}")
+
+>>>
+
+request is:
+{'file': <workers._workers.File object at 0xef88e0>}
+
+Is 'file' expected to be the audio file? Why can't I pass it directly to whisper?
+```

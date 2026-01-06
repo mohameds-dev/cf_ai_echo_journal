@@ -28,34 +28,24 @@ class MyDurableObject(DurableObject):
     """
     def __init__(self, ctx, env):
         super().__init__(ctx, env)
-        self.chat_history = []
         self.sql = ctx.storage.sql
         self.sql.exec(queries.SCHEMA_SQL)
 
-    # TODO: db saving is an unexpected side effect here. move it to a 
-    # different method. worker should have control over history actions
-    async def prompt_llama(self, user_prompt):
-        response = await self.env.AI.run('@cf/meta/llama-3.1-8b-instruct', {"prompt": user_prompt})
-        response_dict = response.to_py()
-        ai_response = response_dict["response"]
-        self.sql.exec(
-            queries.INSERT_ENTRY, 
-            user_prompt, 
-            ai_response
-        )
 
-        return response_dict
+    async def prompt_llm(self, user_prompt):
+        response = await self.env.AI.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {"prompt": user_prompt})
+        return response.to_py().get("response")
     
     async def save_entry_to_history(self, user_prompt, ai_response):
-        # TODO: save the turn here
-        pass
+        self.sql.exec(queries.INSERT_ENTRY, user_prompt, ai_response)
     
-    async def get_saved_entries(self):
-        return list(self.sql.exec(queries.SELECT_ALL_ENTRIES))
+    async def get_history(self):
+        cursor = await self.sql.exec(queries.SELECT_ALL_ENTRIES)
+        return [dict(row) for row in cursor]
     
-    async def get_text_from_whisper(self, audio_bytes):
-        # TODO: hit whisper here and return the text as is
-        pass
+    async def get_text_from_audio(self, audio_bytes):
+        response = await self.env.AI.run('@cf/openai/whisper', {"audio":list(audio_bytes)})
+        return response.to_py().get("text")
 
 
 """
@@ -75,14 +65,19 @@ class Default(WorkerEntrypoint):
             return Response("Not Found", status=404)
         
         stub = self.env.MY_DURABLE_OBJECT.getByName("foo")
-        audio_bytes = None # TODO: get the audio bytes from the request
-        transcribed_text = await stub.get_text_from_whisper(audio_bytes)
 
-        await stub.prompt_llama(f"Summarize these thoughts in a journal style: {transcribed_text}")
+        request_data = await request.form_data()
+        audio_file = request_data.get("file")
+        if not audio_file:
+            return Response("Missing 'file'", status=400)
+        
+        audio_bytes = await audio_file.bytes()
+        transcribed_text = await stub.get_text_from_audio(audio_bytes)
 
-        history = await stub.get_saved_entries()
+        ai_response = await stub.prompt_llm(f"Summarize these thoughts in a journal style: {transcribed_text}")
+        await stub.save_entry_to_history(transcribed_text, ai_response)
 
         return Response(
-                json.dumps({"history":history}),
+                json.dumps({"user_prompt": transcribed_text, "ai_response": ai_response}),
                 headers={"content-type": "application/json"}
             )

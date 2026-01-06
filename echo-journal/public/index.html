@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
-	</head>
-	<body>
-		<h1 id="heading"></h1>
-		<p>This page comes from a static asset stored at `public/index.html` as configured in `wrangler.jsonc`.</p>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
-		</script>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <title>Echo Journal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <h1>🎙️ Echo Journal</h1>
+        
+        <div id="journal-window" class="scroll-window">
+            </div>
+
+        <div class="controls">
+            <button id="recordBtn" class="btn-main">Record</button>
+            <button id="cancelBtn" class="btn-sub hidden">Cancel</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
 </html>
