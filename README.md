@@ -1,5 +1,9 @@
 ## 🎙️ Echo Journal
 
+[![Deploy to Cloudflare Workers](https://img.shields.io/badge/Deployed_on-Cloudflare_Workers-F38020?style=for-the-badge&logo=Cloudflare&logoColor=white)](https://echo-journal.mohameds-account.workers.dev/)
+
+> **Live Demo:** [https://echo-journal.mohameds-account.workers.dev/](https://echo-journal.mohameds-account.workers.dev/)
+
 Echo Journal is a stateful, voice-first AI journaling application built on the Cloudflare edge. It transforms spoken thoughts into structured reflections while maintaining a persistent "brain" that remembers the conversation history.
 
 This was built as part of an optional Cloudflare internship application assignment.
@@ -10,22 +14,32 @@ This was built as part of an optional Cloudflare internship application assignme
 
 ---
 
-### Architecture overview
+### ✨ Key Features
+- **Voice-First Interaction**: Captures browser audio and transcribes it using **Whisper** on Cloudflare's edge.
+- **Stateful AI Memory**: Implemented a history and context system that persists across runs, allowing the AI to maintain a long-term understanding of the user.
+- **Incremental Context Updates**: Uses a background processing loop to condense new entries into a running context summary saved in the database.
+- **History Recovery**: Automatically fetches and renders past journal entries from a local SQLite database on page load.
+- **Manual State Reset**: Includes a "Clear History" feature to wipe both the journal logs and the AI's internal state.
+
+---
+
+### 🏗️ Architecture Overview
+This project utilizes the Cloudflare ecosystem to satisfy all requirements for memory, state, and coordination:
 
 - **Frontend**
-  - Minimal HTML/CSS/JS served by the Worker
-  - Handles basic interaction and audio input
-  - Sends requests to the API endpoint
-
+  - Minimal HTML/CSS/JS served as static assets by the Worker.
+  - Handles basic interaction, audio input, and rendering of persisted history.
 - **Cloudflare Worker (Python)**
-  - Entry point for requests
-  - Orchestrates prompt construction
-  - Interfaces with the Durable Object
-
+  - Acts as the primary **Workflow Coordinator**.
+  - Orchestrates prompt construction and handles routing (`/recording`, `/history`, `/clear`).
+  - Manages asynchronous background tasks via `ctx.waitUntil()` to keep the UI responsive.
 - **Durable Object**
-  - Stores evolving AI state
-  - Uses SQLite for persistence
-  - Represents a single logical “memory instance”
+  - Serves as the **Long-lived State Container**.
+  - Uses **SQLite for persistence** to store the evolving AI state.
+  - Represents a single logical “memory instance” ensuring data consistency.
+- **Workers AI**
+  - **Whisper**: For high-fidelity speech-to-text transcription.
+  - **Llama 3.2 (3B)**: Chosen instead of **Llama 3.3** for its reduced hallucinations and focused responses.
 
 
 ### Running the project (tested using Ubuntu Linux)

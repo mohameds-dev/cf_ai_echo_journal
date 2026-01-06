@@ -8,7 +8,7 @@
 	"ai": {
 		"binding": "AI"
 	},
-	"workers_dev": false,
+	"workers_dev": true,
 	"d1_databases": [
 		{
 		"binding": "journal_db",
@@ -31,6 +31,15 @@
 				"JournalManager"
 			],
 			"tag": "v1"
+		},
+		{
+			"tag": "v2",
+			"deleted_classes": ["MyDurableObject"] 
+		},
+		{
+			"tag": "v3",
+			"new_sqlite_classes": ["JournalManager"],
+			"deleted_classes": ["MyDurableObject"]
 		}
 	],
 	"durable_objects": {
