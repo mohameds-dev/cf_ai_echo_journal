@@ -28,7 +28,7 @@
 	"migrations": [
 		{
 			"new_sqlite_classes": [
-				"MyDurableObject"
+				"JournalManager"
 			],
 			"tag": "v1"
 		}
@@ -36,8 +36,8 @@
 	"durable_objects": {
 		"bindings": [
 			{
-				"class_name": "MyDurableObject",
-				"name": "MY_DURABLE_OBJECT"
+				"class_name": "JournalManager",
+				"name": "JOURNAL_MANAGER"
 			}
 		]
 	},

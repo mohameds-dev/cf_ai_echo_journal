@@ -18,7 +18,7 @@ import queries
  * @property {DurableObjectNamespace} MY_DURABLE_OBJECT - The Durable Object namespace binding
 """
 
-class MyDurableObject(DurableObject):
+class JournalManager(DurableObject):
     """
      * The constructor is invoked once upon creation of the Durable Object, i.e. the first call to
      * `DurableObjectStub::get` for a given identifier (no-op constructors can be omitted)
@@ -64,20 +64,25 @@ class Default(WorkerEntrypoint):
         if "recording" not in request.url:
             return Response("Not Found", status=404)
         
-        stub = self.env.MY_DURABLE_OBJECT.getByName("foo")
+        stub = self.env.JOURNAL_MANAGER.getByName("main_history")
 
-        request_data = await request.form_data()
-        audio_file = request_data.get("file")
-        if not audio_file:
-            return Response("Missing 'file'", status=400)
-        
-        audio_bytes = await audio_file.bytes()
+        audio_bytes = await self.extract_audio_bytes(request)
         transcribed_text = await stub.get_text_from_audio(audio_bytes)
-
         ai_response = await stub.prompt_llm(f"Summarize these thoughts in a journal style: {transcribed_text}")
+
         await stub.save_entry_to_history(transcribed_text, ai_response)
 
         return Response(
                 json.dumps({"user_prompt": transcribed_text, "ai_response": ai_response}),
                 headers={"content-type": "application/json"}
             )
+
+    async def extract_audio_bytes(self, request):
+        request_data = await request.form_data()
+        audio_file = request_data.get("file")
+        if not audio_file:
+            return None
+        
+        audio_bytes = await audio_file.bytes()
+
+        return audio_bytes
