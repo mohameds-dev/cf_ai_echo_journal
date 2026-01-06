@@ -16,3 +16,40 @@ body { font-family: system-ui; display: flex; justify-content: center; backgroun
 .btn-main:disabled { background: #ccc; cursor: not-allowed; }
 .btn-sub { background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; }
 .hidden { display: none; }
+/* Styling the user's original spoken text */
+.user-text {
+    color: #888;
+    font-style: italic;
+    display: block;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* Cleaning up the separator */
+hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 15px 0;
+}
+
+/* Styling the AI's Markdown output within the entry */
+.entry h2 {
+    font-size: 1rem;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.entry p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+    color: #444;
+}
+
+/* Keep your existing entry border */
+.entry { 
+    border-left: 4px solid #f63; 
+    padding: 10px 15px; 
+    background: #fafafa;
+    border-radius: 0 8px 8px 0;
+}

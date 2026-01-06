@@ -77,7 +77,13 @@ async function handleUpload(blob) {
 function addEntryToUI(prompt, response) {
     const div = document.createElement('div');
     div.className = 'entry';
-    div.innerHTML = `<strong>You:</strong> ${prompt}<br><strong>AI:</strong> ${response}`;
+    div.innerHTML = `
+        <strong>You:</strong>
+        <span class="user-text">"${prompt}"</span>
+        <hr>
+        <strong>AI Reflections:</strong><br>
+        ${marked.parse(response)}
+    `;
     journalWindow.appendChild(div);
     journalWindow.scrollTo(0, journalWindow.scrollHeight);
 }

@@ -1,6 +1,8 @@
 from workers import DurableObject, Response, WorkerEntrypoint
 import json
 import queries
+from prompts import LLM_PROMPT
+
 """
  * Welcome to Cloudflare Workers! This is your first Durable Objects application.
  *
@@ -68,7 +70,7 @@ class Default(WorkerEntrypoint):
 
         audio_bytes = await self.extract_audio_bytes(request)
         transcribed_text = await stub.get_text_from_audio(audio_bytes)
-        ai_response = await stub.prompt_llm(f"Summarize these thoughts in a journal style: {transcribed_text}")
+        ai_response = await stub.prompt_llm(f"{LLM_PROMPT} \n {transcribed_text}")
 
         await stub.save_entry_to_history(transcribed_text, ai_response)
 

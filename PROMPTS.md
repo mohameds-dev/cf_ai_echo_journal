@@ -306,3 +306,11 @@ request is:
 
 Is 'file' expected to be the audio file? Why can't I pass it directly to whisper?
 ```
+
+
+
+#### Prompt
+
+```
+How can I render the AI output on the frontend as markdown? Let's start with the simplest approach.
+```
