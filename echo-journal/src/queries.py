@@ -5,6 +5,11 @@ CREATE TABLE IF NOT EXISTS journal_entries(
     ai_response TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS state (
+    key TEXT PRIMARY KEY, 
+    value TEXT
+);
 """
 
 INSERT_ENTRY = """
@@ -20,4 +25,12 @@ SELECT
     created_at 
 FROM history 
 ORDER BY created_at DESC;
+"""
+
+RETRIEVE_CONTEXT = """
+SELECT value FROM state WHERE key = 'context' LIMIT 1
+"""
+
+UDPATE_CONTEXT = """
+INSERT OR REPLACE INTO state (key, value) VALUES ('context', ?)
 """

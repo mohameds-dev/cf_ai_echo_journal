@@ -314,3 +314,21 @@ Is 'file' expected to be the audio file? Why can't I pass it directly to whisper
 ```
 How can I render the AI output on the frontend as markdown? Let's start with the simplest approach.
 ```
+
+#### Prompt
+
+```
+I want to keep the context of the conversation. Passing the entire chat history will cost a lot of tokens unnecessarily. We should be able to keep a hidden context prompt that is included and updated with every turn. It should be in the DurableObject's init and should be saved to database. Let's brainstorm the approach and note any potential issues or gaps.
+```
+
+#### Prompt
+```
+I want to do stub.update_context(transcribed_text) but I don't want to await it before responding to the user. Is there a way to avoid this to make the response quicker?
+```
+
+
+#### Prompt
+
+```
+LLM seems to be overthinking. I need to make it blunt and simple. Should I continue with more complex prompt engineering or should I look for a simpler model? Which simpler model could I use?
+```
