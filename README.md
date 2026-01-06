@@ -32,6 +32,11 @@
 - A local SQLite database is created by default. To delete it and start fresh, remove the hidden `.wrangler` folder. You can use this command: `rm -rf .wrangler`
 
 
+### Architectural notes & technical descisions
+
+- The Durable Object, which is used for data persistence, is named "main_history" is hard-coded just for this proof of concept. In real-world applications, it would be generated using the user ID, which is only possible in an application with Auth set up.
+
+
 ### 📖 Documentation
 https://developers.cloudflare.com/workers
 
