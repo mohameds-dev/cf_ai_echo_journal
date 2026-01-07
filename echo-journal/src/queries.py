@@ -31,7 +31,7 @@ RETRIEVE_CONTEXT = """
 SELECT value FROM state WHERE key = 'context' LIMIT 1
 """
 
-UDPATE_CONTEXT = """
+UPDATE_CONTEXT = """
 INSERT OR REPLACE INTO state (key, value) VALUES ('context', ?)
 """
 

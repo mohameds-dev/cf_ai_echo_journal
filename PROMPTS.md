@@ -1,6 +1,6 @@
 ### Prompts used during the development of this project:
 
-#### Prompt 1
+#### Prompt
 ```
 Explain the role of foo here. How is it related to the durable object? Explain it in simple terms
 
@@ -19,7 +19,7 @@ class Default(WorkerEntrypoint):
         greeting = await stub.say_hello("world")
 ```
 
-#### Prompt 2
+#### Prompt
 ```
 I was trying to install the dependencies inside pyproject.toml in the venv so vscode can resolve "workers" but it's failing due to this error. What am I missing?
 
@@ -73,7 +73,7 @@ uv add workers-runtime-sdk --dev
 ```
 
 
-#### Prompt 3
+#### Prompt
 
 ```
 Does this look right? Any issues I should look out for?
@@ -137,7 +137,7 @@ Attaching additional modules:
 ```
 
 
-#### Prompt 4
+#### Prompt
 ```
 How to use the --active flag to use the active environment instead of using a new one inside the running project? What's the cleaner approach?
 ```
@@ -148,7 +148,7 @@ uv run --active pywrangler dev
 ```
 
 
-#### Prompt 5
+#### Prompt
 
 ```
 This is a function I defined inside the durable object:
@@ -160,7 +160,7 @@ The documentation shows snippets in javascript for calling this API. what about 
 ```
 
 
-#### Prompt 6
+#### Prompt
 ```
 Why does this code cause the prompt text to be added to the history twice?
 
@@ -337,4 +337,40 @@ LLM seems to be overthinking. I need to make it blunt and simple. Should I conti
 
 ```
 Let's retrieve history on page load but also an option to delete it entirely. Any issues I need to look out for before proceeding with this change?
+```
+
+#### Prompt
+
+```
+I want to isolate histories per user without creating a whole login system. Let's create a localstorage entry that is passed with the request, and based on that, the DO is loaded for that specific user on that specific browser.
+
+Let's start with the javascript function that loads (or creates) the local storage entry, and including that in the fetch request.
+
+```
+
+#### Prompt
+
+```
+To make the DO's die out if they have been inactive for more than X amount of time, what do we need to add/change? Give me the relevant docs pages to that part.
+```
+
+#### Prompt
+
+```
+Something doesn't look right in this line..
+
+        self.storage.set_alarm(self.storage.get_alarm() or (self.storage.get_current_time() + SEVEN_DAYS_MS))
+
+
+if get_alarm returns something, we set_alarm to it? Explain your mistake and correct it. Verify why it's correct.
+
+```
+
+#### Prompt
+```
+I want to write a function that prints a clean log error, where I can pass the exception to it and it'll know what to log.
+
+def log_exception(exception):
+
+Let's start with the minimum. Provide me with the common helper functions and start with a very minimal implementation of it.
 ```
