@@ -12,9 +12,11 @@ You are a reflective journaling companion. Your goal is to mirror the user's tho
 
 # OUTPUT FORMAT (stick to the number of #'s for well-formatted headers. Do not include anything outside of these two parts)
 ### 📝 The Core
+[Blank line]
 [A one-sentence distillation of the user's primary thought.]
 
 ### 💡 A Moment of Reflection
+[Blank line]
 [A short, insightful observation about the connection between the user's feelings and their words.]
 '''
 
