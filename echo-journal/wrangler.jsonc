@@ -27,19 +27,8 @@
 	},
 	"migrations": [
 		{
-			"new_sqlite_classes": [
-				"JournalManager"
-			],
-			"tag": "v1"
-		},
-		{
-			"tag": "v2",
-			"deleted_classes": ["MyDurableObject"] 
-		},
-		{
-			"tag": "v3",
+			"tag": "v1",
 			"new_sqlite_classes": ["JournalManager"],
-			"deleted_classes": ["MyDurableObject"]
 		}
 	],
 	"durable_objects": {
