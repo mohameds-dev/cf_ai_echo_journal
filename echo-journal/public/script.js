@@ -64,7 +64,15 @@ async function handleUpload(blob) {
     formData.append('file', blob);
 
     try {
-        const response = await fetch('/recording', { method: 'POST', body: formData });
+        const response = await fetch('/recording', 
+            { 
+                method: 'POST', 
+                body: formData,
+                headers: {
+                'EchoJournal-User-ID': USER_ID
+                }
+            }
+        );
         const result = await response.json();
         addEntryToUI(result.user_prompt, result.ai_response);
     } catch (e) {
@@ -92,28 +100,53 @@ function addEntryToUI(prompt, response) {
 document.getElementById('clearBtn').addEventListener('click', async () => {
     if (!confirm("Wipe all context and history?")) return;
     const urlParams = new URLSearchParams(window.location.search);
-    const key = urlParams.get('key') || '';
     
-    const res = await fetch(`/clear?key=${key}`, { method: 'POST' });
+    const res = await fetch(`/clear`, 
+        { 
+            method: 'POST',
+            headers: {
+                'EchoJournal-User-ID': USER_ID
+            }
+        }
+    );
+        
     if (res.ok) {
         document.getElementById('journal-window').innerHTML = '';
         alert("Memory wiped.");
     }
 });
 
+function getOrCreateUserId() {
+    let userId = localStorage.getItem('journal_user_id');
+    if (!userId) {
+        userId = crypto.randomUUID();
+        localStorage.setItem('journal_user_id', userId);
+    }
+    return userId;
+}
+
+const USER_ID = getOrCreateUserId();
 
 async function loadHistory() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const key = urlParams.get('key') || '';
-    
     try {
-        const res = await fetch(`/history?key=${key}`);
+        const res = await fetch('/history', {
+                headers: {
+                    'EchoJournal-User-ID': USER_ID
+                }
+            }
+        );
+        
         if (res.ok) {
             const history = await res.json();
-            history.forEach(entry => {
-                addEntryToUI(entry.user_prompt, entry.ai_response);
-            });
             const journalWindow = document.getElementById('journal-window');
+            journalWindow.innerHTML = ''; 
+            
+            history.forEach(entry => {
+                if (typeof addEntryToUI === 'function') {
+                    addEntryToUI(entry.user_prompt, entry.ai_response);
+                }
+            });
+            
             journalWindow.scrollTop = journalWindow.scrollHeight;
         }
     } catch (err) {
