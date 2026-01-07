@@ -374,3 +374,12 @@ def log_exception(exception):
 
 Let's start with the minimum. Provide me with the common helper functions and start with a very minimal implementation of it.
 ```
+
+#### Prompt
+```
+Given the context of my frontend code, if the chat is empty, let's add a text that gives a short instruction like "Whoa, it's empty in here. Click the record button and speak your thoughts so we can journal" or something similar.
+
+Of course, the text should only appear in the middle of the chat window if there are no turns (meaning at the beginning of the chat or after the history is cleared)
+
+Design the simplest approach possible, don't overengineer or add unnecessary logic. And I'll take it from there.
+```

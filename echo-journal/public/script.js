@@ -6,6 +6,26 @@ const recordBtn = document.getElementById('recordBtn');
 const cancelBtn = document.getElementById('cancelBtn');
 const journalWindow = document.getElementById('journal-window');
 
+function checkEmptyState() {
+    const hasEntries = journalWindow.querySelectorAll('.entry').length > 0;
+    const existingPlaceholder = document.getElementById('empty-placeholder');
+
+    if (!hasEntries && !existingPlaceholder) {
+        const placeholder = document.createElement('div');
+        placeholder.id = 'empty-placeholder';
+        placeholder.innerHTML = `
+            <div class="placeholder-content">
+                <span class="icon">📝</span>
+                <p>Whoa, it's empty in here.</p>
+                <small>Click the record button and speak your thoughts so we can journal!</small>
+            </div>
+        `;
+        journalWindow.appendChild(placeholder);
+    } else if (hasEntries && existingPlaceholder) {
+        existingPlaceholder.remove();
+    }
+}
+
 function applyState(newState) {
     state = newState;
     console.log("Current State:", state);
@@ -30,20 +50,24 @@ function applyState(newState) {
 
 recordBtn.onclick = async () => {
     if (state === 'Ready') {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
-        audioChunks = [];
-        
-        mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-        mediaRecorder.onstop = () => {
-            if (state === 'Processing') {
-                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                handleUpload(audioBlob);
-            }
-        };
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            audioChunks = [];
+            
+            mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
+            mediaRecorder.onstop = () => {
+                if (state === 'Processing') {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    handleUpload(audioBlob);
+                }
+            };
 
-        mediaRecorder.start();
-        applyState('Recording');
+            mediaRecorder.start();
+            applyState('Recording');
+        } catch (e) {
+            console.error("Microphone access denied", e);
+        }
 
     } else if (state === 'Recording') {
         applyState('Processing');
@@ -53,7 +77,7 @@ recordBtn.onclick = async () => {
 
 cancelBtn.onclick = () => {
     if (mediaRecorder && state === 'Recording') {
-        mediaRecorder.onstop = null; // Prevent trigger
+        mediaRecorder.onstop = null;
         mediaRecorder.stop();
         applyState('Ready');
     }
@@ -94,12 +118,11 @@ function addEntryToUI(prompt, response) {
     `;
     journalWindow.appendChild(div);
     journalWindow.scrollTo(0, journalWindow.scrollHeight);
+    checkEmptyState();
 }
-
 
 document.getElementById('clearBtn').addEventListener('click', async () => {
     if (!confirm("Wipe all context and history?")) return;
-    const urlParams = new URLSearchParams(window.location.search);
     
     const res = await fetch(`/clear`, 
         { 
@@ -111,8 +134,8 @@ document.getElementById('clearBtn').addEventListener('click', async () => {
     );
         
     if (res.ok) {
-        document.getElementById('journal-window').innerHTML = '';
-        alert("Memory wiped.");
+        journalWindow.innerHTML = '';
+        checkEmptyState();
     }
 });
 
@@ -151,6 +174,8 @@ async function loadHistory() {
         }
     } catch (err) {
         console.error("Failed to load history:", err);
+    } finally {
+        checkEmptyState();
     }
 }
 

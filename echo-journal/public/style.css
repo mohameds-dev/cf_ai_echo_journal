@@ -6,6 +6,38 @@ body { font-family: system-ui; display: flex; justify-content: center; backgroun
     border-radius: 12px; padding: 20px; margin-bottom: 20px;
     box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: left;
     display: flex; flex-direction: column; gap: 15px;
+    position: relative;
+}
+
+#empty-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    color: #aaa;
+}
+
+.placeholder-content .icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+    opacity: 0.5;
+}
+
+.placeholder-content p {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 5px 0;
+    color: #666;
+}
+
+.placeholder-content small {
+    display: block;
+    max-width: 250px;
+    margin: 0 auto;
+    line-height: 1.4;
 }
 
 .entry { border-left: 4px solid #f63; padding-left: 10px; }
@@ -16,7 +48,7 @@ body { font-family: system-ui; display: flex; justify-content: center; backgroun
 .btn-main:disabled { background: #ccc; cursor: not-allowed; }
 .btn-sub { background: none; border: none; color: #666; text-decoration: underline; cursor: pointer; }
 .hidden { display: none; }
-/* Styling the user's original spoken text */
+
 .user-text {
     color: #888;
     font-style: italic;
@@ -25,35 +57,21 @@ body { font-family: system-ui; display: flex; justify-content: center; backgroun
     line-height: 1.4;
 }
 
-/* Cleaning up the separator */
 hr {
     border: 0;
     border-top: 1px solid #eee;
     margin: 15px 0;
 }
 
-/* Styling the AI's Markdown output within the entry */
-.entry h2 {
-    font-size: 1rem;
-    margin-top: 15px;
-    margin-bottom: 5px;
-    color: #333;
-}
+.entry h2 { font-size: 1rem; margin-top: 15px; margin-bottom: 5px; color: #333; }
+.entry p { margin: 5px 0; font-size: 0.95rem; color: #444; }
 
-.entry p {
-    margin: 5px 0;
-    font-size: 0.95rem;
-    color: #444;
-}
-
-/* Keep your existing entry border */
 .entry { 
     border-left: 4px solid #f63; 
     padding: 10px 15px; 
     background: #fafafa;
     border-radius: 0 8px 8px 0;
 }
-
 
 .danger-zone { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
 .btn-clear { 
