@@ -24,7 +24,7 @@ SELECT
     ai_response, 
     created_at 
 FROM journal_entries 
-ORDER BY created_at DESC;
+ORDER BY created_at ASC;
 """
 
 RETRIEVE_CONTEXT = """
