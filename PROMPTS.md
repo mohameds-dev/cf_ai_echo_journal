@@ -389,3 +389,8 @@ Design the simplest approach possible, don't overengineer or add unnecessary log
 ```
 llama 3.2 seems to be overwhelmed with complex prompts. It makes blatantly wrong decisions. Give me tips and resources on how to make it follow instructions correctly and not hallucinate.
 ```
+
+#### Prompt
+```
+Let's explore strategies to eliminate hallucinated transcriptions when the recording is too short or just pure noise. Let's perform some efficient calculations on the audio bytes to see if there is a high deviation in the values before attempting to transcribe it.
+```
