@@ -1,7 +1,7 @@
 from workers import DurableObject, Response, WorkerEntrypoint
 import json
 import queries
-from prompts import MAIN_PROMPT, UPDATE_PROMPT
+import prompts
 from urllib.parse import urlparse
 from utils import activity, log_exception
 import time
@@ -47,7 +47,7 @@ class JournalManager(DurableObject):
             return ""
     
     async def update_context(self, new_prompt):
-        self.running_context = await self.prompt_llm(UPDATE_PROMPT.format(self.running_context, new_prompt))
+        self.running_context = await self.prompt_llm(prompts.UPDATE_PROMPT.format(self.running_context, new_prompt))
         self.sql.exec(queries.UPDATE_CONTEXT, self.running_context)
     
     async def get_running_context(self):
@@ -109,12 +109,16 @@ class Default(WorkerEntrypoint):
         try:
             transcribed_text = await stub.get_text_from_audio(audio_bytes)
             current_context = await stub.get_running_context()
-            ai_response = await stub.prompt_llm(f"""
-                {MAIN_PROMPT} 
-                {(f'Keep in mind the following context:\n{current_context}') if current_context else ''}
-                {transcribed_text}
-                """)
-            
+            is_valid, reasoning = await self.validate_user_input(transcribed_text)
+            if is_valid:
+                ai_response = await stub.prompt_llm(f"""
+                    {prompts.MAIN_PROMPT} 
+                    {(f'Keep in mind the following context:\n{current_context}') if current_context else ''}
+                    {transcribed_text}
+                    """)
+            else:
+                ai_response = await self.respond_to_invalid_input(reasoning)
+                
             self.ctx.waitUntil(stub.update_context(transcribed_text))
             self.ctx.waitUntil(stub.save_entry_to_history(transcribed_text, ai_response))
 
@@ -146,3 +150,17 @@ class Default(WorkerEntrypoint):
         stub = self.env.JOURNAL_MANAGER.get(obj_id)
 
         return stub
+
+    async def validate_user_input(self, user_input):
+        response_str = await self.prompt_llm(prompts.VALIDATE_USER_INPUT_PROMPT.replace("USER_INPUT", user_input))
+        try:    
+            response_json = json.loads(response_str)
+            return response_json.get("is_valid"), response_json.get("reasoning")
+        except Exception as e:
+            log_exception(e)
+            return False, "Error occurred. Please try again later."
+
+    async def respond_to_invalid_input(self, reasoning):
+        return await self.prompt_llm(
+            prompts.RESPOND_TO_INVALID_INPUT_PROMPT.replace("REASONING", reasoning)
+            )

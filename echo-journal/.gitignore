@@ -66,3 +66,6 @@ jspm_packages/
 python_modules/
 .venv/
 .venv-workers/
+
+# python cache
+__pycache__/
