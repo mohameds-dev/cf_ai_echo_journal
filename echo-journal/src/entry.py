@@ -163,8 +163,10 @@ class Default(WorkerEntrypoint):
             if not match:
                 raise ValueError("No JSON found in response")
             response_json = json.loads(match.group(0))
+            is_valid = response_json.get("is_valid", False) == True
+            category = response_json.get("category", "IRRELEVANT")
 
-            return response_json.get("is_valid"), response_json.get("category")
+            return is_valid, category
         
         except Exception as e:
             log_exception(e)
