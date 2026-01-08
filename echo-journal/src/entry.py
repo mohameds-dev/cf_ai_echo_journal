@@ -3,7 +3,7 @@ import json
 import queries
 import prompts
 from urllib.parse import urlparse
-from utils import activity, log_exception
+from utils import activity, log_exception, is_valid_speech
 import time
 import re
 
@@ -38,11 +38,12 @@ class JournalManager(DurableObject):
         return [row.to_py() for row in cursor]
     
     async def get_text_from_audio(self, audio_bytes):
-        if not audio_bytes:
+        if not is_valid_speech(audio_bytes):
             return ""
         try:
-            response = await self.env.AI.run('@cf/openai/whisper', {"audio":list(audio_bytes)})
-            return response.to_py().get("text")
+            response = await self.env.AI.run('@cf/openai/whisper-tiny-en', {"audio":list(audio_bytes)})
+            text = response.to_py().get("text")
+            return text if text != "you" else ""
         except Exception as e:
             log_exception(e)
             return ""
