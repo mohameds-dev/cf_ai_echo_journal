@@ -383,3 +383,9 @@ Of course, the text should only appear in the middle of the chat window if there
 
 Design the simplest approach possible, don't overengineer or add unnecessary logic. And I'll take it from there.
 ```
+
+
+#### Prompt
+```
+llama 3.2 seems to be overwhelmed with complex prompts. It makes blatantly wrong decisions. Give me tips and resources on how to make it follow instructions correctly and not hallucinate.
+```
