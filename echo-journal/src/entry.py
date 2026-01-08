@@ -1,10 +1,11 @@
 from workers import DurableObject, Response, WorkerEntrypoint
 import json
 import queries
-from prompts import MAIN_PROMPT, UPDATE_PROMPT
+import prompts
 from urllib.parse import urlparse
 from utils import activity, log_exception
 import time
+import re
 
 class JournalManager(DurableObject):
     """
@@ -47,7 +48,7 @@ class JournalManager(DurableObject):
             return ""
     
     async def update_context(self, new_prompt):
-        self.running_context = await self.prompt_llm(UPDATE_PROMPT.format(self.running_context, new_prompt))
+        self.running_context = await self.prompt_llm(prompts.UPDATE_PROMPT.format(self.running_context, new_prompt))
         self.sql.exec(queries.UPDATE_CONTEXT, self.running_context)
     
     async def get_running_context(self):
@@ -82,17 +83,17 @@ class Default(WorkerEntrypoint):
         if path == "/favicon.ico":
             return Response("Not Found", status=404)
         
-        stub = self.get_stub(request)
+        self.stub = self.get_stub(request)
 
         if path == "/clear":
-            await stub.clear_history()
+            await self.stub.clear_history()
             return Response("History cleared", status=200)
         
         elif path == "/recording":
-            return await self.handle_journal_entry(request, stub)
+            return await self.handle_journal_entry(request)
         
         elif path == "/history":
-            history = await stub.get_history()
+            history = await self.stub.get_history()
             return Response(
                 json.dumps(history),
                 headers={"content-type": "application/json"}
@@ -101,22 +102,27 @@ class Default(WorkerEntrypoint):
         return Response("Not Found", status=404)
         
     
-    async def handle_journal_entry(self, request, stub):
+    async def handle_journal_entry(self, request):
         audio_bytes = await self.extract_audio_bytes(request)
         if not audio_bytes:
             return Response("No audio data provided.", status=400)
         
         try:
-            transcribed_text = await stub.get_text_from_audio(audio_bytes)
-            current_context = await stub.get_running_context()
-            ai_response = await stub.prompt_llm(f"""
-                {MAIN_PROMPT} 
-                {(f'Keep in mind the following context:\n{current_context}') if current_context else ''}
-                {transcribed_text}
-                """)
+            transcribed_text = await self.stub.get_text_from_audio(audio_bytes)
+            is_valid, reasoning = await self.validate_user_input(transcribed_text)
             
-            self.ctx.waitUntil(stub.update_context(transcribed_text))
-            self.ctx.waitUntil(stub.save_entry_to_history(transcribed_text, ai_response))
+            if is_valid:
+                current_context = await self.stub.get_running_context()
+                ai_response = await self.stub.prompt_llm(f"""
+                    {prompts.MAIN_PROMPT} 
+                    {(f'Keep in mind the following context:\n{current_context}') if current_context else ''}
+                    {transcribed_text}
+                    """)
+            else:
+                ai_response = await self.respond_to_invalid_input(transcribed_text, reasoning)
+                
+            self.ctx.waitUntil(self.stub.update_context(transcribed_text))
+            self.ctx.waitUntil(self.stub.save_entry_to_history(transcribed_text, ai_response))
 
             return Response(
                     json.dumps({"user_prompt": transcribed_text, "ai_response": ai_response}),
@@ -146,3 +152,28 @@ class Default(WorkerEntrypoint):
         stub = self.env.JOURNAL_MANAGER.get(obj_id)
 
         return stub
+
+    async def validate_user_input(self, user_input):
+        if len(user_input.strip()) < 4:
+            return False, "No input (too short)"
+        
+        try:    
+            response_str = await self.stub.prompt_llm(prompts.VALIDATE_USER_INPUT_PROMPT.replace("USER_INPUT", user_input))
+            match = re.search(r'\{.*\}', response_str, re.DOTALL)
+            if not match:
+                raise ValueError("No JSON found in response")
+            response_json = json.loads(match.group(0))
+            is_valid = response_json.get("is_valid", False) == True
+            category = response_json.get("category", "IRRELEVANT")
+
+            return is_valid, category
+        
+        except Exception as e:
+            log_exception(e)
+            return False, "Meaningless or convoluted."
+
+    async def respond_to_invalid_input(self, user_input, reasoning):
+        return await self.stub.prompt_llm(prompts.RESPOND_TO_INVALID_INPUT_PROMPT
+                        .replace("REASONING", reasoning)
+                        .replace("USER_INPUT", user_input)
+                        )
